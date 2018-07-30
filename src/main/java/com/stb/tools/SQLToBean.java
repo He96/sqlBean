@@ -1,3 +1,4 @@
+package com.stb.tools;
 
 import java.io.*;
 import java.sql.*;
@@ -54,7 +55,7 @@ public class SQLToBean {
 
     private final String xml_path = pan + "hs_factory/mapper/xml";
 
-    private final String bean_package = pan + "com.hs." + moduleName + ".entity";
+    private final String bean_package = "com.hs." + moduleName + ".entity";
 
     private final String mapper_package = "com.hs." + moduleName + ".mapper";
 
@@ -93,7 +94,6 @@ public class SQLToBean {
         try {
             new SQLToBean().generate();
             // 自动打开生成文件的目录
-            Runtime.getRuntime().exec("cmd /c start explorer "+pan.substring(0,pan.indexOf(":"))+":\\");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -155,6 +155,9 @@ public class SQLToBean {
 
 
     private void processTable(String table) {
+        if(table.substring(0,1).equals("t") && table.indexOf("_") == 2){
+            table = table.substring(3,table.length());
+        }
         StringBuffer sb = new StringBuffer(table.length());
         String tableNew = table.toLowerCase();
         String[] tables = tableNew.split("_");

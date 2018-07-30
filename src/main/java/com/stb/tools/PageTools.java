@@ -1,8 +1,10 @@
+package com.stb.tools;
+
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.net.URL;
 
 public class PageTools {
     private JPanel page1;
@@ -14,6 +16,7 @@ public class PageTools {
     private JButton login;//登录
     private JButton start;//生成实体类
     private JComboBox selectCombo;
+    private JProgressBar jProgressBar;
 
     private String t_url = "";
     private String t_port = "";
@@ -21,6 +24,7 @@ public class PageTools {
     private String t_userName = "";
     private String t_password = "";
     private String t_pan = "";
+    private SQLToBean sqlToBean;
 
     public static void main(String[] args) {
         new PageTools().Frame();
@@ -31,7 +35,7 @@ public class PageTools {
         JFrame frame = new JFrame("sql转实体类工具");
         frame.setSize(350, 350);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ImageIcon icon = new ImageIcon("favicon.ico");
+        ImageIcon icon = new ImageIcon("top.ico");
         frame.setIconImage(icon.getImage());
         //创建面板
         page1 = new JPanel();
@@ -91,34 +95,36 @@ public class PageTools {
         page1.add(password);
 
         JLabel choosePan = new JLabel("选择存储位置:");
-        choosePan.setBounds(10,170,100,25);
+        choosePan.setBounds(10, 170, 100, 25);
         page1.add(choosePan);
 
-        final DefaultComboBoxModel chooseData = new DefaultComboBoxModel();
+        //final DefaultComboBoxModel chooseData = new DefaultComboBoxModel();
+
+        selectCombo = new JComboBox();
         File[] roots = File.listRoots();
-        for(File file:roots){
-            chooseData.addElement(file.getPath());
+        for (File file : roots) {
+            selectCombo.addItem(file.getPath());
         }
-        selectCombo = new JComboBox(chooseData);
         selectCombo.setEditable(true);
-        selectCombo.setSize(new Dimension(80,25));
-        selectCombo.setPreferredSize(new Dimension(80,25));
         selectCombo.setSelectedIndex(0);
+        selectCombo.setBounds(100, 170, 80, 25);
+        //JScrollPane chooseList = new JScrollPane(selectCombo);
+        page1.add(selectCombo);
 
-        JScrollPane chooseList = new JScrollPane(selectCombo);
-        page1.add(chooseList);
-
-        login = new JButton("连接");
-        login.setBounds(80, 200, 80, 25);
+        login = new JButton("连接测试");
+        login.setBounds(60, 220, 100, 25);
         login.setActionCommand("loginBtn");
         login.addActionListener(new ButtonClickListener());
         page1.add(login);
         start = new JButton("生成实体类");
-        start.setBounds(180, 200, 120, 25);
+        start.setBounds(180, 220, 120, 25);
         start.setActionCommand("startBtn");
         start.addActionListener(new ButtonClickListener());
         page1.add(start);
-
+        jProgressBar = new JProgressBar();
+        jProgressBar.setBounds(10,270,290,25);
+        jProgressBar.setStringPainted(true);
+        page1.add(jProgressBar);
     }
 
     class ButtonClickListener implements ActionListener {
@@ -131,50 +137,65 @@ public class PageTools {
                 t_userName = userName.getText();
                 t_password = new String(password.getPassword());
                 t_pan = selectCombo.getItemAt(selectCombo.getSelectedIndex()).toString();
-                t_pan = t_pan.substring(0,t_pan.indexOf(":"));
-                if(t_url.equals("")){
-                    JOptionPane.showMessageDialog(null,"IP地址不能为空","提示",JOptionPane.INFORMATION_MESSAGE);
+                t_pan = t_pan.substring(0, t_pan.indexOf(":"));
+                if (t_url.equals("")) {
+                    JOptionPane.showMessageDialog(null, "IP地址不能为空", "提示", JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
-                if(t_port.equals("")){
-                    JOptionPane.showMessageDialog(null,"端口号不能为空","提示",JOptionPane.INFORMATION_MESSAGE);
+                if (t_port.equals("")) {
+                    JOptionPane.showMessageDialog(null, "端口号不能为空", "提示", JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
-                if(t_dbName.equals("")){
-                    JOptionPane.showMessageDialog(null,"数据库名称不能为空","提示",JOptionPane.INFORMATION_MESSAGE);
+                if (t_dbName.equals("")) {
+                    JOptionPane.showMessageDialog(null, "数据库名称不能为空", "提示", JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
-                if(t_userName.equals("")){
-                    JOptionPane.showMessageDialog(null,"用户名不能为空","提示",JOptionPane.INFORMATION_MESSAGE);
+                if (t_userName.equals("")) {
+                    JOptionPane.showMessageDialog(null, "用户名不能为空", "提示", JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
-                if(t_password.equals("")){
-                    JOptionPane.showMessageDialog(null,"密码不能为空","提示",JOptionPane.INFORMATION_MESSAGE);
+                if (t_password.equals("")) {
+                    JOptionPane.showMessageDialog(null, "密码不能为空", "提示", JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
                 //连接测试
-                SQLToBean sqlToBean = new SQLToBean(t_url,t_port,t_dbName,t_pan,t_userName,t_password);
+                sqlToBean = new SQLToBean(t_url, t_port, t_dbName, t_pan, t_userName, t_password);
                 boolean flag = sqlToBean.init();
-                if(flag){
+                if (flag) {
                     login.setText("断开连接");
                     login.setActionCommand("closeConn");
-
-                }else{
-                    JOptionPane.showMessageDialog(null,"数据库连接失败","提示",JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "数据库连接成功", "提示", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "数据库连接失败", "提示", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-            }else if(command.equals("closeConn")){
-                new SQLToBean(t_url,t_port,t_dbName,t_pan,t_userName,t_password).closeConn();
-                JOptionPane.showMessageDialog(null,"数据库连接已断开","提示",JOptionPane.INFORMATION_MESSAGE);
+            } else if (command.equals("closeConn")) {
+                sqlToBean.closeConn();
+                JOptionPane.showMessageDialog(null, "数据库连接已断开", "提示", JOptionPane.INFORMATION_MESSAGE);
                 login.setText("开始连接");
                 login.setActionCommand("loginBtn");
                 return;
-            }else if(command.equals("startBtn")){
+            } else if (command.equals("startBtn")) {
                 try {
-                    new SQLToBean(t_url,t_port,t_dbName,t_pan,t_userName,t_password).generate();
-                }catch (Exception ex){
+                    try {
+                        for (int i = 0; i < 100; i++) {
+                            if (i % 5 == 0) {
+                                Thread.sleep(500);
+                            } else {
+                                Thread.sleep(100);
+                            }
+                            jProgressBar.setValue(i);
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    sqlToBean.generate();
+                    jProgressBar.setValue(100);
+                    jProgressBar.setString("生成成功!");
+                    Runtime.getRuntime().exec("cmd /c start explorer "+t_pan+":\\");
+                } catch (Exception ex) {
                     ex.printStackTrace();
-                    JOptionPane.showMessageDialog(null,"生成失败","提示",JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "生成失败", "提示", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             }
