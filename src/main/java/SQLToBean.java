@@ -23,7 +23,7 @@ public class SQLToBean {
      * *
      * **********************************************************
      */
-    private static String pan ="d:/";
+    private static String pan = "d:/";
 
     private final String type_char = "char";
 
@@ -61,13 +61,13 @@ public class SQLToBean {
 
     private final String driverName = "com.mysql.jdbc.Driver";
 
-    private final String dbName = "spm";
+    private  String dbName = "spm";
 
-    private final String user = "root";
+    private  String user = "root";
 
-    private final String password = "he123123";
+    private  String password = "he123123";
 
-    private final String url = "jdbc:mysql://127.0.0.1:3306/" + dbName + "?characterEncoding=utf8";
+    private String url = "jdbc:mysql://127.0.0.1:3306/" + dbName + "?characterEncoding=utf8";
 
     private String tableName = null;
 
@@ -78,10 +78,50 @@ public class SQLToBean {
     private Connection conn = null;
 
 
-    private void init() throws ClassNotFoundException, SQLException {
-        createFile();
-        Class.forName(driverName);
-        conn = DriverManager.getConnection(url, user, password);
+    public SQLToBean(){
+
+    }
+
+    public SQLToBean(String ip, String port, String dbName, String pan, String user, String password) {
+        this.url = "jdbc:mysql://" + ip + ":" + port + "/" + dbName + "?characterEncoding=utf8";
+        this.pan = pan + ":/";
+        this.user = user;
+        this.password = password;
+    }
+
+    public static void main(String[] args) {
+        try {
+            new SQLToBean().generate();
+            // 自动打开生成文件的目录
+            Runtime.getRuntime().exec("cmd /c start explorer "+pan.substring(0,pan.indexOf(":"))+":\\");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean init() {
+        boolean flag = true;
+        try {
+            createFile();
+            Class.forName(driverName);
+            conn = DriverManager.getConnection(url, user, password);
+        } catch (Exception e) {
+            e.printStackTrace();
+            flag = false;
+        }
+        return flag;
+    }
+
+    public void closeConn() {
+        try {
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //创建文件夹
@@ -713,7 +753,7 @@ public class SQLToBean {
 
 
     public void generate() throws ClassNotFoundException, SQLException, IOException {
-        init();
+        //init();
         String prefix = "show full fields from ";
         List<String> columns = null;
         List<String> types = null;
@@ -743,18 +783,4 @@ public class SQLToBean {
         conn.close();
     }
 
-
-    public static void main(String[] args) {
-        try {
-            new SQLToBean().generate();
-            // 自动打开生成文件的目录
-            Runtime.getRuntime().exec("cmd /c start explorer D:\\");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
