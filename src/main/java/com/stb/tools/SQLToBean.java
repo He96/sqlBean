@@ -11,19 +11,11 @@ import java.util.Map;
 
 /**
  * 自动生成MyBatis的实体类、实体映射XML文件、Mapper
- *
  * @author heshuang
  * @create 2018-07-31 16:23
  **/
-@SuppressWarnings("hiding")
 public class SQLToBean {
-    /**
-     * *********************************使用前必读*******************
-     * *
-     * * 使用前请将moduleName更改为自己模块的名称即可（一般情况下与数据库名一致），其他无须改动。
-     * *
-     * **********************************************************
-     */
+
     private static String pan = "d:/";
 
     private final String type_char = "char";
