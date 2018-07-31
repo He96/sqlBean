@@ -1,6 +1,9 @@
 package com.stb.tools;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -17,6 +20,7 @@ public class PageTools {
     private JButton start;//生成实体类
     private JComboBox selectCombo;
     private JProgressBar jProgressBar;
+    private JLabel msgInfo;
 
     private String t_url = "";
     private String t_port = "";
@@ -25,6 +29,7 @@ public class PageTools {
     private String t_password = "";
     private String t_pan = "";
     private SQLToBean sqlToBean;
+    boolean isStop = false;
 
     public static void main(String[] args) {
         new PageTools().Frame();
@@ -33,10 +38,14 @@ public class PageTools {
     public void Frame() {
         //创建JFrame
         JFrame frame = new JFrame("sql转实体类工具");
-        frame.setSize(350, 350);
+        frame.setSize(350, 400);
+        int fWidth = 350;
+        int fHeight = 400;
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ImageIcon icon = new ImageIcon("top.ico");
-        frame.setIconImage(icon.getImage());
+        //窗口居中
+        int width = Toolkit.getDefaultToolkit().getScreenSize().width;
+        int height = Toolkit.getDefaultToolkit().getScreenSize().height;
+        frame.setBounds((width-fWidth)/2,(height-fHeight)/2,fWidth,fHeight);
         //创建面板
         page1 = new JPanel();
         frame.add(page1);
@@ -112,19 +121,28 @@ public class PageTools {
         page1.add(selectCombo);
 
         login = new JButton("连接测试");
-        login.setBounds(60, 220, 100, 25);
+        login.setBounds(60, 220, 200, 25);
         login.setActionCommand("loginBtn");
         login.addActionListener(new ButtonClickListener());
         page1.add(login);
         start = new JButton("生成实体类");
-        start.setBounds(180, 220, 120, 25);
-        start.setActionCommand("startBtn");
-        start.addActionListener(new ButtonClickListener());
+        start.setBounds(180, 220, 100, 25);
+        start.setBackground(Color.GRAY);
+        start.setActionCommand("stopStar");//stopStar
+        start.addActionListener(new Change());
         page1.add(start);
+        start.setVisible(false);//隐藏
         jProgressBar = new JProgressBar();
-        jProgressBar.setBounds(10,270,290,25);
-        jProgressBar.setStringPainted(true);
+        jProgressBar.setBounds(20, 270, 290, 25);
+        jProgressBar.setMaximum(100);
+        jProgressBar.setMinimum(0);
+        jProgressBar.setValue(0);
+        jProgressBar.setStringPainted(true);//具体进度显示
         page1.add(jProgressBar);
+        jProgressBar.setVisible(false);
+        msgInfo = new JLabel("");
+        msgInfo.setBounds(20, 300, 290, 25);
+        page1.add(msgInfo);
     }
 
     class ButtonClickListener implements ActionListener {
@@ -162,8 +180,17 @@ public class PageTools {
                 sqlToBean = new SQLToBean(t_url, t_port, t_dbName, t_pan, t_userName, t_password);
                 boolean flag = sqlToBean.init();
                 if (flag) {
+                    //连接成功
                     login.setText("断开连接");
                     login.setActionCommand("closeConn");
+                    login.setBounds(60, 220, 100, 25);
+                    start.setVisible(true);
+                    start.setActionCommand("startBtn");
+                    start.setBackground(null);
+                    jProgressBar.setVisible(true);
+                    jProgressBar.setString(null);
+                    jProgressBar.setValue(0);
+                    msgInfo.setText("");
                     JOptionPane.showMessageDialog(null, "数据库连接成功", "提示", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(null, "数据库连接失败", "提示", JOptionPane.WARNING_MESSAGE);
@@ -171,36 +198,60 @@ public class PageTools {
                 }
             } else if (command.equals("closeConn")) {
                 sqlToBean.closeConn();
-                JOptionPane.showMessageDialog(null, "数据库连接已断开", "提示", JOptionPane.INFORMATION_MESSAGE);
+                jProgressBar.setVisible(false);
+                start.setVisible(false);
+                start.setActionCommand("stopStar");
+                start.setBackground(Color.GRAY);
                 login.setText("开始连接");
                 login.setActionCommand("loginBtn");
+                login.setBounds(60, 220, 200, 25);
+                JOptionPane.showMessageDialog(null, "数据库连接已断开", "提示", JOptionPane.INFORMATION_MESSAGE);
                 return;
-            } else if (command.equals("startBtn")) {
-                try {
-                    try {
-                        for (int i = 0; i < 100; i++) {
-                            if (i % 5 == 0) {
-                                Thread.sleep(500);
-                            } else {
-                                Thread.sleep(100);
-                            }
-                            jProgressBar.setValue(i);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    sqlToBean.generate();
-                    jProgressBar.setValue(100);
-                    jProgressBar.setString("生成成功!");
-                    Runtime.getRuntime().exec("cmd /c start explorer "+t_pan+":\\");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "生成失败", "提示", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
             }
         }
+
+
     }
 
+    class Change implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String command = e.getActionCommand();
+            if (command.equals("startBtn")) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            for (int i = 1; i <= 100; i++) {
+                                if (i % 17 == 0) {
+                                    Thread.sleep(500);
+                                }
+                                jProgressBar.setValue(i);
+                            }
+                            long startTime = System.currentTimeMillis();
+                            //开始执行
+                            sqlToBean.generate();
+                            long endTime = System.currentTimeMillis();
+                            jProgressBar.setValue(100);
+                            Thread.sleep(500);
+                            jProgressBar.setString("执行成功!共耗时:" + (endTime - startTime) + "ms");
+                            start.setBackground(Color.GRAY);
+                            start.setActionCommand("stopStar");
+                            msgInfo.setText("生成文件位置  "+t_pan+":/hs_factory");
+                            Runtime.getRuntime().exec("cmd /c start explorer " + t_pan + ":\\");
+                            login.setText("开始连接");
+                            login.setActionCommand("loginBtn");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            JOptionPane.showMessageDialog(null, "生成失败", "提示", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+                    }
+                }).start();
+            }else if (command.equals("stopStar")) {
+                JOptionPane.showMessageDialog(null, "请先连接数据库", "提示", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
+
+    }
 
 }
