@@ -399,7 +399,7 @@ public class SQLToBean {
         bw.newLine();
         bw = buildMethodComment(bw, "修改 （匹配有值的字段）");
         bw.newLine();
-        bw.write("\t" + "int update(\"Map<String,Object> map\");");
+        bw.write("\t" + "int update(Map<String,Object> map);");
         bw.newLine();
         bw = buildMethodComment(bw, "修改（根据主键ID修改）");
         bw.newLine();
