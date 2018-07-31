@@ -12,8 +12,8 @@ import java.util.Map;
 /**
  * 自动生成MyBatis的实体类、实体映射XML文件、Mapper
  *
- * @author lifeifei
- * @create 2018-06-19 16:23
+ * @author heshuang
+ * @create 2018-07-31 16:23
  **/
 @SuppressWarnings("hiding")
 public class SQLToBean {
@@ -62,11 +62,11 @@ public class SQLToBean {
 
     private final String driverName = "com.mysql.jdbc.Driver";
 
-    private  String dbName = "spm";
+    private  String dbName = "";
 
-    private  String user = "root";
+    private  String user = "";
 
-    private  String password = "he123123";
+    private  String password = "";
 
     private String url = "jdbc:mysql://127.0.0.1:3306/" + dbName + "?characterEncoding=utf8";
 

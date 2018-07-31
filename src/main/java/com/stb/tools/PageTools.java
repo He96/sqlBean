@@ -1,13 +1,25 @@
 package com.stb.tools;
 
+
+import org.jvnet.substance.SubstanceLookAndFeel;
+import org.jvnet.substance.border.StandardBorderPainter;
+import org.jvnet.substance.button.StandardButtonShaper;
+import org.jvnet.substance.painter.MatteGradientPainter;
+import org.jvnet.substance.painter.StandardGradientPainter;
+import org.jvnet.substance.painter.text.AbstractTextPainter;
+import org.jvnet.substance.painter.text.DefaultTextPainter;
+import org.jvnet.substance.skin.SubstanceBusinessBlackSteelLookAndFeel;
+import org.jvnet.substance.skin.SubstanceChallengerDeepLookAndFeel;
+import org.jvnet.substance.skin.SubstanceMangoLookAndFeel;
+import org.jvnet.substance.text.TextUtilities;
+import org.jvnet.substance.theme.SubstanceBottleGreenTheme;
+import org.jvnet.substance.watermark.SubstanceStripeWatermark;
+
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.net.URL;
 
 public class PageTools {
     private JPanel page1;
@@ -37,22 +49,31 @@ public class PageTools {
 
     public void Frame() {
         //创建JFrame
-        JFrame frame = new JFrame("sql转实体类工具");
-        frame.setSize(350, 400);
-        int fWidth = 350;
-        int fHeight = 400;
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //窗口居中
-        int width = Toolkit.getDefaultToolkit().getScreenSize().width;
-        int height = Toolkit.getDefaultToolkit().getScreenSize().height;
-        frame.setBounds((width-fWidth)/2,(height-fHeight)/2,fWidth,fHeight);
-        //创建面板
-        page1 = new JPanel();
-        frame.add(page1);
-        //调用用户定义的方法并添加组件到面板
-        placeComponents(page1);
-        //设置界面可见
-        frame.setVisible(true);
+        userSkin();
+        //useTheme();
+        try {
+            JFrame frame = new JFrame("sqlToEntity");
+            frame.setSize(350, 400);
+            frame.setResizable(false);
+            int fWidth = 350;
+            int fHeight = 400;
+            frame.setIconImage(new ImageIcon("src/image/miss.ico").getImage());
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            //窗口居中
+            int width = Toolkit.getDefaultToolkit().getScreenSize().width;
+            int height = Toolkit.getDefaultToolkit().getScreenSize().height;
+            frame.setBounds((width - fWidth) / 2, (height - fHeight) / 2, fWidth, fHeight);
+            //创建面板
+            page1 = new JPanel();
+            frame.add(page1);
+            page1.setFocusable(true);
+            //调用用户定义的方法并添加组件到面板
+            placeComponents(page1);
+            //设置界面可见
+            frame.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void placeComponents(JPanel page1) {
@@ -61,7 +82,6 @@ public class PageTools {
         JLabel urlText = new JLabel("IP:");
         urlText.setBounds(10, 20, 80, 25);
         page1.add(urlText);
-
         //创建文本域用于用户输入
         url = new JTextField(20);
         url.addFocusListener(new JTextFieldHintListener("请输入数据库IP地址", url));
@@ -121,7 +141,7 @@ public class PageTools {
         page1.add(selectCombo);
 
         login = new JButton("连接测试");
-        login.setBounds(60, 220, 200, 25);
+        login.setBounds(60, 280, 200, 25);
         login.setActionCommand("loginBtn");
         login.addActionListener(new ButtonClickListener());
         page1.add(login);
@@ -204,7 +224,7 @@ public class PageTools {
                 start.setBackground(Color.GRAY);
                 login.setText("开始连接");
                 login.setActionCommand("loginBtn");
-                login.setBounds(60, 220, 200, 25);
+                login.setBounds(60, 280, 200, 25);
                 JOptionPane.showMessageDialog(null, "数据库连接已断开", "提示", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
@@ -235,7 +255,7 @@ public class PageTools {
                             jProgressBar.setString("执行成功!共耗时:" + (endTime - startTime) + "ms");
                             start.setBackground(Color.GRAY);
                             start.setActionCommand("stopStar");
-                            msgInfo.setText("生成文件位置  "+t_pan+":/hs_factory");
+                            msgInfo.setText("生成文件位置  " + t_pan + ":/hs_factory");
                             Runtime.getRuntime().exec("cmd /c start explorer " + t_pan + ":\\");
                             login.setText("开始连接");
                             login.setActionCommand("loginBtn");
@@ -246,12 +266,37 @@ public class PageTools {
                         }
                     }
                 }).start();
-            }else if (command.equals("stopStar")) {
+            } else if (command.equals("stopStar")) {
                 JOptionPane.showMessageDialog(null, "请先连接数据库", "提示", JOptionPane.WARNING_MESSAGE);
                 return;
             }
         }
 
+    }
+
+    //设置主题和皮肤
+    static void userSkin() {
+        try {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            JDialog.setDefaultLookAndFeelDecorated(true);
+            //UIManager.setLookAndFeel(new SubstanceMangoLookAndFeel());
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    static void useTheme(){
+        try{
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    SubstanceLookAndFeel.setSkin("");
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }
