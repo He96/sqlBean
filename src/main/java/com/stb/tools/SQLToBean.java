@@ -191,9 +191,10 @@ public class SQLToBean {
     private String olType(String type) {
         if (type.contains("(")) {
             type = type.substring(0, type.indexOf("(")).toUpperCase();
-            if (type.equals("INT")) {
+            if (type.equals("INT") || type.equals("TINYINT")) {
                 type = "INTEGER";
             }
+
         }
         return type;
     }
@@ -714,7 +715,7 @@ public class SQLToBean {
         //查询条件
         bw.write("\t<!--查询条件-->");
         bw.newLine();
-        bw.write("\t<sql id=\"columns\">");
+        bw.write("\t<sql id=\"selectSql\">");
         bw.newLine();
         bw.write("\t <where>");
         bw.newLine();
